@@ -11,6 +11,18 @@ from game.objects import BasicObject
 class Player(BasicObject):
     color = BLUE
 
+    def __init__(
+        self,
+        pos: tuple[float, float] | None = None,
+        vel: tuple[float, float] | None = None,
+        friction: float = FRIC,
+        color: tuple[int, int, int] | None = None,
+        size: int = OBJ_SIZE,
+    ):
+        super().__init__(
+            pos=pos, vel=(0, 0), friction=friction, color=self.color, size=size
+        )
+
     def move(self):
         self.acc = Vector2(0, 0)
 
@@ -50,8 +62,10 @@ class Player(BasicObject):
 
         if bounce_x:
             self._bounce("x")
+            self.change_color()
         elif bounce_y:
             self._bounce("y")
+            self.change_color()
 
         self.rect.midbottom = self.pos
 

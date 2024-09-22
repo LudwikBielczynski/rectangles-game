@@ -13,26 +13,23 @@ if TYPE_CHECKING:
     from pygame.surface import Surface
 
 
-
-
 class BasicObject(Sprite):
     color: tuple[int, int, int] = BLACK
 
     def __init__(
         self,
         pos: tuple[float, float] | None = None,
-        vel: tuple[float, float] = [0.0, 0.0],
+        vel: tuple[float, float] | None = None,
         friction: float = FRIC,
         color: tuple[int, int, int] | None = None,
         size: int = OBJ_SIZE,
     ):
         super().__init__()
         self.size = size
-        self.surf = pygame.Surface((size, size))
-        if color is None:
-            color = random.choice(COLORS)
-        self.surf.fill(color)
-        self.rect = self.surf.get_rect()
+        self.image = pygame.Surface((size, size))
+        self.change_color(color)
+
+        self.rect = self.image.get_rect()
 
         if pos is None:
             x = random.randint(0, WIDTH)
@@ -41,18 +38,22 @@ class BasicObject(Sprite):
         else:
             self.pos = Vector2(pos[0], pos[1])
 
+        if vel is None:
+            vel = (random.randint(0, 10), random.randint(0, 10))
         self.vel = Vector2(vel[0], vel[1])
         self.acc = Vector2(0, 0)
 
         self.friction = friction
 
-    def change_color(self):
-        color_idx = random.randint(0, len(COLORS) - 1)
-        self.color = COLORS[color_idx]
-        self.surf.fill(self.color)
+    def change_color(self, color: tuple[int, int, int] | None = None):
+        if color is None:
+            self.color = random.choice(COLORS)
+        else:
+            self.color = color
+        self.image.fill(self.color)
 
     def draw(self, surface: "Surface"):
-        surface.blit(self.surf, self.rect)
+        surface.blit(self.image, self.rect)
 
     def move(self):
         self.acc = Vector2(0, 0)
