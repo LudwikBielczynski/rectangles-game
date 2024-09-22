@@ -1,5 +1,6 @@
 import random
 import sys
+from time import time
 from typing import TYPE_CHECKING, Literal
 
 import pygame
@@ -13,7 +14,7 @@ from game.objects import Other, Player
 if TYPE_CHECKING:
     from pygame.surface import Surface
 
-
+CREATION_LAG = 2
 FPS = 60
 
 
@@ -25,6 +26,8 @@ class App:
         self.sprites = pygame.sprite.Group()
         self.objects = pygame.sprite.Group()
         self.player = None
+
+        self.last_object_created = time()
 
     def on_game_init(self):
         pygame.init()
@@ -72,21 +75,26 @@ class App:
         for o_idx, o in enumerate(self.objects):
             collide = self.player.rect.colliderect(o.rect)
             if collide:
+
                 o.vel.x = -o.vel.x
                 o.vel.y = -o.vel.y
                 o.change_color()
 
-                for obj_idx in range(0, 100):
-                    _o = Other(
-                        pos=(
-                            self.player.pos.x + PLAYER_SIZE,
-                            self.player.pos.y + PLAYER_SIZE,
-                        ),
-                        vel=(-self.player.vel.x, self.player.vel.y),
-                        friction=0,
-                    )
-                    self.objects.add(_o)
-                    self.sprites.add(_o)
+                for obj_idx in range(0, 2):
+
+                    if time() > self.last_object_created + CREATION_LAG:
+                        _o = Other(
+                            pos=(
+                                self.player.pos.x + PLAYER_SIZE,
+                                self.player.pos.y + PLAYER_SIZE,
+                            ),
+                            vel=(-self.player.vel.x, self.player.vel.y),
+                            friction=0,
+                        )
+                        self.objects.add(_o)
+                        self.sprites.add(_o)
+
+                        self.last_object_created = time()
 
                 self.player.change_color()
                 self.player.vel.x = -self.player.vel.x * BOUNCE
