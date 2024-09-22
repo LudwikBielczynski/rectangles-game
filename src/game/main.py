@@ -17,80 +17,98 @@ if TYPE_CHECKING:
 FPS = 60
 
 
-pygame.init()
+class App:
+    def __init__(self):
+        self._running = False
+        self._display_surf = None
+        self.size = self.width, self.height = WIDTH, HEIGHT
+        self.sprites = pygame.sprite.Group()
+        self.objects = pygame.sprite.Group()
+        self.player = None
+
+    def on_game_init(self):
+        pygame.init()
+        self.clock = pygame.time.Clock()
+
+        self._display_surf = pygame.display.set_mode(self.size)
+        pygame.display.set_caption("Game")
+
+        self.player = Player(size=PLAYER_SIZE)
+        self.sprites.add(self.player)
+
+        for entity in self.sprites:
+            self._display_surf.blit(entity.surf, entity.rect)
+
+        # Initialize other objects
+        o_list = []
+        for o in range(0, 10):
+            color_idx = random.randint(0, len(COLORS) - 1)
+            color = COLORS[color_idx]
+            o = Other(
+                vel=(random.randint(0, 10), random.randint(0, 10)),
+                friction=0,
+                color=color,
+            )
+            self.objects.add(o)
+            self.sprites.add(o)
+
+        self._running = True
+
+    def on_execute(self):
+        if self._running == False:
+            self.on_game_init()
+
+        while self._running:
+            for event in pygame.event.get():
+                self.on_event(event)
+            self.on_loop()
+            self.on_render()
+
+        self.on_cleanup()
+
+    def on_loop(self):
+        self._display_surf.fill(WHITE)
+
+        for o_idx, o in enumerate(self.objects):
+            collide = self.player.rect.colliderect(o.rect)
+            if collide:
+                o.vel.x = -o.vel.x
+                o.vel.y = -o.vel.y
+                o.change_color()
+
+                for obj_idx in range(0, 100):
+                    _o = Other(
+                        pos=(
+                            self.player.pos.x + PLAYER_SIZE,
+                            self.player.pos.y + PLAYER_SIZE,
+                        ),
+                        vel=(-self.player.vel.x, self.player.vel.y),
+                        friction=0,
+                    )
+                    self.objects.add(_o)
+                    self.sprites.add(_o)
+
+                self.player.change_color()
+                self.player.vel.x = -self.player.vel.x * BOUNCE
+                self.player.vel.y = -self.player.vel.y * BOUNCE
+
+    def on_render(self):
+        for sprite in self.sprites:
+            sprite.move()
+            sprite.draw(self._display_surf)
+
+        pygame.display.update()
+        self.clock.tick(FPS)
+
+    def on_event(self, event):
+        if event.type == pygame.QUIT:
+            self._running = False
+
+    def on_cleanup(self):
+        pygame.quit()
+        sys.exit()
 
 
-FRAME_PER_SEC = pygame.time.Clock()
-
-DISPLAY_SURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game")
-
-
-
-sprites = pygame.sprite.Group()
-
-# Initialize player
-p_1 = Player(size=PLAYER_SIZE)
-sprites.add(p_1)
-
-
-# Initialize object
-o_list = []
-for o in range(0, 1):
-    color_idx = random.randint(0, len(COLORS) - 1)
-    color = COLORS[color_idx]
-    o = Other(
-        vel=(random.randint(0, 10), random.randint(0, 10)), friction=0, color=color
-    )
-    o_list.append(o)
-    sprites.add(o)
-
-# Event loop
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-        # elif event.type == COLLID
-
-    DISPLAY_SURFACE.fill(WHITE)
-    for sprite in sprites:
-        sprite.move()
-        sprite.draw(DISPLAY_SURFACE)
-
-    p_1.move()
-    # p_1.draw(DISPLAY_SURFACE)
-
-    for o_idx, o in enumerate(o_list):
-        collide = p_1.rect.colliderect(o.rect)
-        if collide:
-            # o_list.pop(idx)
-            # o.move()
-            # o.draw(DISPLAY_SURFACE)
-
-            o.vel.x = -o.vel.x
-            o.vel.y = -o.vel.y
-            o.change_color()
-            # o.draw(DISPLAY_SURFACE)
-
-            for obj_idx in range(0, 1):
-                _o = Other(
-                    pos=(p_1.pos.x + PLAYER_SIZE, p_1.pos.y + PLAYER_SIZE),
-                    vel=(-p_1.vel.x, p_1.vel.y),
-                    friction=0,
-                )
-                # _o.draw(DISPLAY_SURFACE)
-                o_list.append(_o)
-                sprites.add(_o)
-
-            # o.vel.x = 0
-            # o.vel.y = 0
-
-            p_1.change_color()
-            # p_1.draw(DISPLAY_SURFACE)
-            p_1.vel.x = -p_1.vel.x * BOUNCE
-            p_1.vel.y = -p_1.vel.y * BOUNCE
-
-    pygame.display.update()
-    FRAME_PER_SEC.tick(FPS)
+if __name__ == "__main__":
+    app = App()
+    app.on_execute()
