@@ -72,6 +72,7 @@ class App:
             if collide:
                 if self.player.color == o.color:
                     o.kill()
+                    self.player.increase_size(10)
 
                 else:
                     o.vel.x = -o.vel.x
@@ -96,7 +97,7 @@ class App:
 
                             self.last_object_created = time()
 
-                    self.player.change_color()
+                    self.player.next_color()
                     self.player.vel.x = -self.player.vel.x * BOUNCE
                     self.player.vel.y = -self.player.vel.y * BOUNCE
 

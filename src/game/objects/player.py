@@ -43,12 +43,12 @@ class Player(BasicObject):
         self.pos += self.vel + 0.5 * self.acc
 
         bounce_x = False
-        if self.pos.x > WIDTH:
-            self.pos.x = WIDTH
+        if self.pos.x > WIDTH - self.size // 2:
+            self.pos.x = WIDTH - self.size // 2
             bounce_x = True
 
-        elif self.pos.x < 0:
-            self.pos.x = 0
+        elif self.pos.x < self.size // 2:
+            self.pos.x = self.size // 2
             bounce_x = True
 
         bounce_y = False
@@ -56,16 +56,17 @@ class Player(BasicObject):
             self.pos.y = HEIGHT
             bounce_y = True
 
+
         elif self.pos.y < self.size:
             self.pos.y = self.size
             bounce_y = True
 
         if bounce_x:
             self._bounce("x")
-            self.change_color()
+            self.next_color()
         elif bounce_y:
             self._bounce("y")
-            self.change_color()
+            self.next_color()
 
         self.rect.midbottom = self.pos
 

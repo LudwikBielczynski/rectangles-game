@@ -26,7 +26,10 @@ class BasicObject(Sprite):
     ):
         super().__init__()
         self.size = size
+        self.size_max = size * 3
+
         self.image = pygame.Surface((size, size))
+        self.color_idx = 0
         self.change_color(color)
 
         self.rect = self.image.get_rect()
@@ -45,12 +48,33 @@ class BasicObject(Sprite):
 
         self.friction = friction
 
+    def change_size(self, size: int):
+        self.size = size
+        self.image = pygame.transform.scale(self.image, (size, size))
+        # self.rect = self.image.get_rect()
+
+    def increase_size(self, size_increase: int):
+        self.rect = self.rect.inflate(size_increase, size_increase)
+
+        size = self.size + size_increase
+        if size > self.size_max:
+            size = self.size_max
+        self.change_size(size)
+
     def change_color(self, color: tuple[int, int, int] | None = None):
         if color is None:
             self.color = random.choice(COLORS)
         else:
             self.color = color
         self.image.fill(self.color)
+
+    def next_color(self):
+        self.color_idx += 1
+        if self.color_idx >= len(COLORS):
+            self.color_idx = 0
+
+        color = COLORS[self.color_idx]
+        self.change_color(color)
 
     def draw(self, surface: "Surface"):
         surface.blit(self.image, self.rect)
