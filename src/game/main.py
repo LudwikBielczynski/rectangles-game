@@ -127,6 +127,9 @@ class App:
         pygame.quit()
         sys.exit()
 
+def main ():
+    app = App()
+    app.on_execute()
 
 if __name__ == "__main__":
     app = App()
