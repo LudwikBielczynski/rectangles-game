@@ -51,15 +51,15 @@ class BasicObject(Sprite):
     def change_size(self, size: int):
         self.size = size
         self.image = pygame.transform.scale(self.image, (size, size))
-        # self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
 
     def increase_size(self, size_increase: int):
-        self.rect = self.rect.inflate(size_increase, size_increase)
-
         size = self.size + size_increase
-        if size > self.size_max:
+        if size < self.size_max:
+            self.rect = self.rect.inflate(size_increase, size_increase)
+            self.change_size(size)
+        else:
             size = self.size_max
-        self.change_size(size)
 
     def change_color(self, color: tuple[int, int, int] | None = None):
         if color is None:
